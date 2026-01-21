@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Painel Administrativo - Zeus</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .bg-dark { background-color: #0b0f1a; }
-        .pink-hot { color: #FF1493; }
-        .bg-pink-hot { background-color: #FF1493; }
-    </style>
+    <style>.bg-dark { background-color: #0b0f1a; } .pink-hot { color: #FF1493; } .bg-pink-hot { background-color: #FF1493; }</style>
 </head>
 <body class="bg-dark text-slate-100 font-sans min-h-screen flex items-center justify-center p-4">
 
@@ -17,48 +13,30 @@
         <div class="text-center">
             <img src="https://zeus-rr.github.io/treino/icon.png" class="w-20 h-20 mx-auto mb-4">
             <h2 class="text-3xl font-black italic uppercase pink-hot">ZEUS TREINO</h2>
-            <p class="text-xs font-bold opacity-50 uppercase tracking-widest">Painel do Professor</p>
+            <p class="text-xs font-bold opacity-50 uppercase tracking-widest">Painel Administrativo</p>
         </div>
 
         <div class="space-y-4">
-            <div>
-                <label class="text-[10px] font-black uppercase opacity-50 ml-2">ID do Professor</label>
-                <input type="text" id="profId" placeholder="Ex: zeus01" class="w-full bg-slate-800 p-4 rounded-2xl outline-none border border-transparent focus:border-pink-hot transition-all font-bold">
-            </div>
-            <div>
-                <label class="text-[10px] font-black uppercase opacity-50 ml-2">Senha</label>
-                <input type="password" id="profPass" placeholder="****" class="w-full bg-slate-800 p-4 rounded-2xl outline-none border border-transparent focus:border-pink-hot transition-all font-bold">
-            </div>
-
-            <button onclick="handleLogin()" class="w-full bg-pink-hot text-white py-4 rounded-2xl font-black uppercase shadow-lg hover:scale-95 transition-transform">
-                Entrar no Sistema
-            </button>
+            <input type="text" id="profId" placeholder="ID do Professor" class="w-full bg-slate-800 p-4 rounded-2xl outline-none font-bold">
+            <input type="password" id="profPass" placeholder="Senha" class="w-full bg-slate-800 p-4 rounded-2xl outline-none font-bold">
+            <button onclick="handleLogin()" class="w-full bg-pink-hot text-white py-4 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
         </div>
 
         <div class="border-t border-slate-800 pt-6 space-y-4">
             <details class="group">
-                <summary class="text-center cursor-pointer list-none text-[10px] font-black uppercase opacity-50 hover:opacity-100 transition-all">
-                    Criar Novo Perfil de Professor
-                </summary>
+                <summary class="text-center cursor-pointer list-none text-[10px] font-black uppercase opacity-50">Criar Novo Perfil</summary>
                 <div class="space-y-3 mt-4 bg-slate-800/50 p-4 rounded-2xl">
-                    <input type="text" id="newName" placeholder="Seu Nome Profissional" class="w-full bg-slate-800 p-3 rounded-xl outline-none text-xs">
-                    <input type="url" id="newPhoto" placeholder="Link da sua Foto" class="w-full bg-slate-800 p-3 rounded-xl outline-none text-xs">
+                    <input type="text" id="newName" placeholder="Nome Profissional" class="w-full bg-slate-800 p-3 rounded-xl text-xs">
+                    <input type="url" id="newPhoto" placeholder="Link da sua Foto" class="w-full bg-slate-800 p-3 rounded-xl text-xs">
                     <input type="color" id="newColor" value="#FF1493" class="w-full h-10 bg-slate-800 rounded-xl cursor-pointer">
-                    <button onclick="handleRegister()" class="w-full border-2 border-pink-hot pink-hot py-3 rounded-xl font-black text-[10px] uppercase">
-                        Cadastrar Agora
-                    </button>
+                    <button onclick="handleRegister()" class="w-full border-2 border-pink-hot pink-hot py-3 rounded-xl font-black text-[10px] uppercase">Cadastrar</button>
                 </div>
             </details>
 
             <details class="group">
-                <summary class="text-center cursor-pointer list-none text-[8px] font-black uppercase opacity-20 hover:opacity-100 transition-all mt-4">
-                    Manutenção (Resetar Sistema)
-                </summary>
-                <div class="mt-4 p-4 border border-red-900/30 rounded-2xl bg-red-900/10">
-                    <p class="text-[8px] text-red-500 uppercase font-black text-center mb-2">Atenção: Isso apagará todos os professores e históricos salvos neste navegador!</p>
-                    <button onclick="resetSystem()" class="w-full bg-red-600 text-white py-2 rounded-xl font-black text-[10px] uppercase">
-                        Apagar Tudo e Resetar
-                    </button>
+                <summary class="text-center cursor-pointer list-none text-[8px] font-black uppercase opacity-20 mt-4">Manutenção (Reset)</summary>
+                <div class="mt-4 p-4 border border-red-900/30 rounded-2xl bg-red-900/10 text-center">
+                    <button onclick="resetSystem()" class="bg-red-600 text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase">Apagar Tudo e Resetar</button>
                 </div>
             </details>
         </div>
@@ -71,40 +49,27 @@
             const name = document.getElementById('newName').value.trim();
             const photo = document.getElementById('newPhoto').value.trim();
             const color = document.getElementById('newColor').value;
-
-            if (!id || !pass || !name) return alert("Preencha ID, Senha e Nome!");
-
+            if (!id || !pass || !name) return alert("Preencha os campos!");
             let staff = JSON.parse(localStorage.getItem('staff_data')) || [];
-            if (staff.find(p => p.id === id)) return alert("Este ID já existe!");
-
+            if (staff.find(p => p.id === id)) return alert("ID já existe!");
             staff.push({ id, pass, name, photo, color });
             localStorage.setItem('staff_data', JSON.stringify(staff));
-            
-            alert("Cadastro realizado! Use o ID e Senha acima para entrar.");
-            location.reload();
+            alert("Cadastrado! Faça o login."); location.reload();
         }
 
         function handleLogin() {
             const id = document.getElementById('profId').value.trim();
             const pass = document.getElementById('profPass').value.trim();
-
             const staff = JSON.parse(localStorage.getItem('staff_data')) || [];
             const prof = staff.find(p => p.id === id && p.pass === pass);
-
             if (prof) {
                 const auth = btoa(JSON.stringify({ id: prof.id, pw: prof.pass }));
                 window.location.href = `index.html?auth=${auth}`;
-            } else {
-                alert("Acesso negado! Verifique ID e Senha.");
-            }
+            } else { alert("Acesso Negado!"); }
         }
 
         function resetSystem() {
-            if (confirm("TEM CERTEZA? Isso excluirá permanentemente todos os dados de professores e treinos salvos neste navegador.")) {
-                localStorage.clear();
-                alert("Sistema resetado com sucesso!");
-                location.reload();
-            }
+            if (confirm("Apagar todos os dados?")) { localStorage.clear(); location.reload(); }
         }
     </script>
 </body>
