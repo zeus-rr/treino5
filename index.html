@@ -15,12 +15,8 @@
     <style>
         :root { --main-color: #FF1493; }
         body { font-size: 1rem; transition: background 0.3s, color 0.3s; }
-        
-        /* Classes dinâmicas que respeitam o tamanho da fonte global */
         .dynamic-text { font-size: 1.8rem !important; }
         .dynamic-sub { font-size: 0.9rem !important; }
-        .workout-card h3 { font-size: 1.1rem !important; }
-
         .is-conjugated { margin-bottom: -1rem !important; border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; border-bottom: 2px dashed var(--main-color) !important; z-index: 10; }
         .is-student-mode .admin-ui { display: none !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -39,17 +35,16 @@
             </div>
 
             <div class="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-800 space-y-4">
-                <h3 class="text-[10px] font-black uppercase text-pink-hot tracking-widest text-center italic">Perfil do Aluno</h3>
+                <h3 class="text-[10px] font-black uppercase text-pink-hot tracking-widest text-center italic">Dados do Aluno</h3>
                 <input type="text" id="studentName" placeholder="Nome do Aluno" oninput="updateUI()" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl outline-none font-bold uppercase text-xs">
-                <input type="url" id="studentPhoto" placeholder="Link da Foto do Aluno" oninput="updateUI()" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl outline-none text-[10px]">
-                <textarea id="generalNotes" placeholder="Observações do Treino" oninput="updateUI()" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl outline-none h-20 text-xs"></textarea>
+                <input type="url" id="studentPhoto" placeholder="URL da Foto do Aluno" oninput="updateUI()" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl outline-none text-[10px]">
+                <textarea id="generalNotes" placeholder="Observações" oninput="updateUI()" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl outline-none h-20 text-xs"></textarea>
                 
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="saveToHistory()" class="bg-pink-hot text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg">Salvar Dados</button>
+                    <button onclick="saveToHistory()" class="bg-pink-hot text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg">Salvar</button>
                     <button onclick="copyStudentLink()" class="bg-slate-800 text-white py-4 rounded-2xl font-black text-[10px] uppercase">Gerar Link</button>
                 </div>
             </div>
-
             <div id="historyList" class="space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar"></div>
             <div id="libContainer" class="space-y-2"></div> 
         </aside>
@@ -57,141 +52,100 @@
         <section class="lg:col-span-8 space-y-6">
             <div class="flex justify-end items-center gap-3 mb-4">
                 <div class="flex bg-white dark:bg-slate-800 rounded-xl p-1 shadow-sm border border-slate-200 dark:border-slate-700">
-                    <button onclick="changeFontSize(-2)" class="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-black text-sm border-r border-slate-200 dark:border-slate-700">A-</button>
+                    <button onclick="changeFontSize(-2)" class="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-black text-sm">A-</button>
                     <button onclick="changeFontSize(2)" class="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-black text-lg">A+</button>
                 </div>
-                <button onclick="toggleTheme()" class="p-3 bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700 text-xl hover:scale-110 transition-transform">🌓</button>
+                <button onclick="toggleTheme()" class="p-3 bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700 text-xl">🌓</button>
             </div>
 
-            <header class="flex justify-between items-center mb-8">
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <img id="displayStudentPhoto" src="https://zeus-rr.github.io/treino/icon.png" class="w-24 h-24 rounded-full border-2 border-pink-hot object-cover shadow-lg">
-                        <img id="headerProfPhoto" src="" class="w-10 h-10 rounded-full border-2 border-slate-900 absolute -bottom-1 -right-1 object-cover">
-                    </div>
-                    <div>
-                        <h4 id="displayStudent" class="font-black italic uppercase pink-bold leading-none dynamic-text">NOVO ALUNO</h4>
-                        <p id="displayProf" class="font-bold opacity-40 uppercase dynamic-sub"></p>
-                    </div>
+            <header class="flex items-center gap-4 mb-8">
+                <div class="relative">
+                    <img id="displayStudentPhoto" src="https://zeus-rr.github.io/treino/icon.png" class="w-24 h-24 rounded-full border-2 border-pink-hot object-cover">
+                    <img id="headerProfPhoto" src="" class="w-10 h-10 rounded-full border-2 border-slate-900 absolute -bottom-1 -right-1 object-cover">
+                </div>
+                <div>
+                    <h4 id="displayStudent" class="font-black italic uppercase pink-bold leading-none dynamic-text">NOVO ALUNO</h4>
+                    <p id="displayProf" class="font-bold opacity-40 uppercase dynamic-sub"></p>
                 </div>
             </header>
-
             <div id="workoutGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
     </main>
 
     <script>
-        let currentStaff = null;
-        let baseFontSize = 16;
+        let currentStaff = null; let baseFontSize = 16;
         let workoutData = {
-            student: "", studentPhoto: "", generalNotes: "", photoProf: "", profName: "", profPhone: "", themeColor: "#FF1493",
+            student: "", studentPhoto: "", generalNotes: "", photoProf: "", profName: "", themeColor: "#FF1493",
             days: { segunda: [], terca: [], quarta: [], quinta: [], sexta: [], sabado: [] }
         };
 
-        const library = {
-            "Peito (Variantes)": ["Supino Reto Barra", "Supino Reto Halteres", "Supino Inclinado Barra", "Supino Inclinado Halteres", "Supino Declinado", "Crucifixo Reto", "Peck Deck (Voador)", "Crossover Cabo Alto", "Crossover Cabo Médio", "Crossover Cabo Baixo", "Flexão de Braços Solo", "Supino Máquina Convergente", "Fly no Banco 30º", "Pullover Halter", "Dips (Paralelas) Peito"],
-            "Costas (Dorsal)": ["Puxada Frente Aberta", "Puxada Triângulo", "Puxada Supinada", "Remada Curvada Barra", "Remada Curvada Halteres", "Remada Unilateral (Serrote)", "Remada Baixa Polia", "Remada Cavalinho", "Pulldown Corda", "Barra Fixa Aberta", "Levantamento Terra Clássico", "Extensão Lombar", "Remada Máquina Articulada", "Face Pull"],
-            "Pernas (Quadríceps)": ["Agachamento Livre Barra", "Agachamento Hack", "Leg Press 45º", "Leg Press Horizontal", "Cadeira Extensora", "Agachamento Búlgaro", "Afundo com Halteres", "Passada (Walking Lunges)", "Agachamento Sumô", "Sissy Squat"],
-            "Pernas (Posterior/Glúteo)": ["Stiff Barra", "Stiff Halteres", "Mesa Flexora", "Cadeira Flexora", "Elevação Pélvica Barra", "Cadeira Abdutora", "Cadeira Adutora", "Glúteo no Cabo (Coice)", "Levantamento Terra Romeno (RDL)", "Abdução com Caneleiras"],
-            "Ombros (Deltoides)": ["Desenvolvimento Militar", "Desenvolvimento Halteres", "Desenvolvimento Arnold", "Elevação Lateral Halteres", "Elevação Lateral Cabo", "Elevação Frontal Barra", "Crucifixo Inverso Halter", "Encolhimento de Ombros"],
-            "Braços (Bíceps)": ["Rosca Direta Barra W", "Rosca Alternada", "Rosca Martelo", "Rosca Scott Barra", "Rosca Concentrada", "Rosca Inclinada 45º", "Rosca Cross Baixo", "Rosca Inversa Barra"],
-            "Braços (Tríceps)": ["Tríceps Pulley V", "Tríceps Corda", "Tríceps Testa Barra W", "Tríceps Francês Halter", "Mergulho no Banco", "Dips (Paralelas) Tríceps", "Tríceps Coice Halter", "Supino Pegada Fechada"],
-            "Panturrilha": ["Gêmeos em Pé", "Gêmeos Sentado", "Gêmeos no Leg Press"],
-            "Core e Abs": ["Abdominal Supra Solo", "Abdominal Infra Solo", "Prancha Isométrica", "Prancha Lateral", "Abdominal Roda", "Abdominal na Polia", "V-Sit (Canivete)", "Vácuo Abdominal"],
-            "Cárdio e Funcional": ["Corrida Esteira", "Bicicleta Ergométrica", "Corda Naval", "Elíptico", "Pular Corda", "Burpees", "Polichinelos", "Mountain Climbers", "Swing Kettlebell"]
-        };
+        const library = { "Peito": ["Supino Reto", "Supino Inclinado", "Crucifixo", "Peck Deck"], "Costas": ["Puxada Frente", "Remada Curvada", "Pulldown"], "Pernas": ["Agachamento", "Leg Press", "Extensora"], "Braços": ["Rosca Direta", "Tríceps Corda"] };
 
-        function changeFontSize(delta) {
-            baseFontSize += delta;
-            if (baseFontSize < 12) baseFontSize = 12;
-            if (baseFontSize > 30) baseFontSize = 30;
-            document.documentElement.style.fontSize = baseFontSize + 'px';
-        }
-
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-        }
+        function changeFontSize(d) { baseFontSize += d; document.documentElement.style.fontSize = baseFontSize + 'px'; }
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
 
         function updateUI() {
             workoutData.student = document.getElementById('studentName').value;
             workoutData.studentPhoto = document.getElementById('studentPhoto').value;
             workoutData.generalNotes = document.getElementById('generalNotes').value;
-
-            document.getElementById('profNameDisplay').innerText = workoutData.profName || "Professor";
-            document.getElementById('profPhotoDisplay').src = workoutData.photoProf || "";
-            document.getElementById('headerProfPhoto').src = workoutData.photoProf || "";
             document.getElementById('displayStudent').innerText = workoutData.student || "NOVO ALUNO";
             document.getElementById('displayStudentPhoto').src = workoutData.studentPhoto || "https://zeus-rr.github.io/treino/icon.png";
             document.getElementById('displayProf').innerText = "Personal: " + (workoutData.profName || "");
+            document.getElementById('profNameDisplay').innerText = workoutData.profName || "PROFESSOR";
+            document.getElementById('profPhotoDisplay').src = workoutData.photoProf || "";
+            document.getElementById('headerProfPhoto').src = workoutData.photoProf || "";
             document.documentElement.style.setProperty('--main-color', workoutData.themeColor);
         }
 
         function copyStudentLink() {
-            // Sincroniza dados antes de gerar o link
-            workoutData.student = document.getElementById('studentName').value;
-            workoutData.studentPhoto = document.getElementById('studentPhoto').value;
-            
-            if (!workoutData.student) { alert("Nome do aluno é obrigatório!"); return; }
-
+            updateUI();
+            if (!workoutData.student) return alert("Digite o nome!");
             const dataStr = btoa(encodeURIComponent(JSON.stringify(workoutData)));
-            const finalUrl = `${window.location.origin}${window.location.pathname}?aluno=${dataStr}`;
-            
-            navigator.clipboard.writeText(finalUrl).then(() => {
-                alert("Link de treino copiado com nome e foto inclusos!");
-            });
+            const url = `${window.location.origin}${window.location.pathname}?aluno=${dataStr}`;
+            navigator.clipboard.writeText(url).then(() => alert("Link Copiado com Nome e Foto!"));
         }
 
-        // --- Restante das funções do sistema (Render, History, Library) ---
         function init() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const authParam = urlParams.get('auth');
-            const alunoParam = urlParams.get('aluno');
-
-            if (alunoParam) {
+            const params = new URLSearchParams(window.location.search);
+            const aluno = params.get('aluno');
+            const auth = params.get('auth');
+            if (aluno) {
                 document.body.classList.add('is-student-mode');
-                workoutData = JSON.parse(decodeURIComponent(atob(alunoParam)));
-            } else if (authParam) {
-                const auth = JSON.parse(atob(authParam));
+                workoutData = JSON.parse(decodeURIComponent(atob(aluno)));
+            } else if (auth) {
+                const data = JSON.parse(atob(auth));
                 const staff = JSON.parse(localStorage.getItem('staff_data')) || [];
-                currentStaff = staff.find(p => p.id === auth.id && p.pass === auth.pw);
+                currentStaff = staff.find(p => p.id === data.id && p.pass === data.pw);
                 if (currentStaff) {
                     workoutData.profName = currentStaff.name;
                     workoutData.photoProf = currentStaff.photo;
                     workoutData.themeColor = currentStaff.color;
                 }
             }
-            render();
-            renderLibrary();
-            renderHistory();
-            updateUI();
+            render(); renderLibrary(); renderHistory(); updateUI();
         }
 
         function render() {
-            const grid = document.getElementById('workoutGrid');
-            grid.innerHTML = "";
+            const grid = document.getElementById('workoutGrid'); grid.innerHTML = "";
             Object.keys(workoutData.days).forEach(day => {
                 const dayDiv = document.createElement('div');
-                dayDiv.className = "workout-card bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-lg border border-slate-100 dark:border-slate-800";
+                dayDiv.className = "bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-lg border border-slate-100 dark:border-slate-800";
                 dayDiv.innerHTML = `<h3 class="font-black italic uppercase mb-4 pink-bold border-b border-pink-hot/10 pb-2">${day}</h3><div id="list-${day}" class="space-y-3 min-h-[50px]"></div>`;
-                grid.appendChild(dayDiv);
-                renderDayItems(day);
+                grid.appendChild(dayDiv); renderDayItems(day);
             });
         }
 
         function renderDayItems(day) {
             const container = document.getElementById(`list-${day}`);
             container.innerHTML = (workoutData.days[day] || []).map((ex, idx) => `
-                <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl relative ${ex.conj ? 'is-conjugated' : ''}">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="font-black uppercase pink-hot leading-tight dynamic-sub" style="font-size: 0.9rem">${ex.name}</span>
-                        <div class="flex gap-2 admin-ui">
-                            <button onclick="toggleConj('${day}', ${idx})" class="opacity-30">🔗</button>
-                            <button onclick="removeItem('${day}', ${idx})" class="opacity-30">✕</button>
-                        </div>
+                <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl ${ex.conj ? 'is-conjugated' : ''}">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-black uppercase pink-hot dynamic-sub">${ex.name}</span>
+                        <div class="admin-ui flex gap-2"><button onclick="toggleConj('${day}',${idx})">🔗</button><button onclick="removeItem('${day}',${idx})">✕</button></div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" placeholder="Sets" value="${ex.sets||''}" onchange="workoutData.days['${day}'][${idx}].sets=this.value" class="bg-white dark:bg-slate-700 p-2 rounded-lg outline-none font-bold dynamic-sub">
-                        <input type="text" placeholder="Carga" value="${ex.load||''}" onchange="workoutData.days['${day}'][${idx}].load=this.value" class="bg-white dark:bg-slate-700 p-2 rounded-lg outline-none font-bold dynamic-sub">
+                        <input type="text" placeholder="Sets" value="${ex.sets||''}" onchange="workoutData.days['${day}'][${idx}].sets=this.value" class="bg-white dark:bg-slate-700 p-2 rounded-lg text-xs font-bold">
+                        <input type="text" placeholder="Carga" value="${ex.load||''}" onchange="workoutData.days['${day}'][${idx}].load=this.value" class="bg-white dark:bg-slate-700 p-2 rounded-lg text-xs font-bold">
                     </div>
                 </div>
             `).join('');
@@ -203,43 +157,14 @@
 
         function renderLibrary() {
             const container = document.getElementById('libContainer');
-            container.innerHTML = `
-                <div class="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-slate-800 shadow-xl">
-                    <h3 class="text-[10px] font-black uppercase mb-4 text-pink-hot text-center italic">Biblioteca</h3>
-                    <div class="space-y-2">
-                        ${Object.keys(library).map(cat => `
-                            <details class="group">
-                                <summary class="list-none p-3 bg-slate-800 rounded-xl cursor-pointer font-bold text-[9px] uppercase flex justify-between items-center group-open:bg-pink-hot group-open:text-white transition-all">
-                                    ${cat} <span>+</span>
-                                </summary>
-                                <div class="p-2 space-y-1">
-                                    ${library[cat].map(ex => `
-                                        <div class="flex justify-between items-center p-2 hover:bg-slate-700 rounded-lg">
-                                            <span class="text-[8px] font-bold uppercase opacity-70">${ex}</span>
-                                            <select onchange="if(this.value) addItem(this.value, '${ex}'); this.value='';" class="bg-pink-hot text-white text-[8px] rounded px-1 outline-none">
-                                                <option value="">+</option>
-                                                <option value="segunda">SEG</option><option value="terca">TER</option><option value="quarta">QUA</option><option value="quinta">QUI</option><option value="sexta">SEX</option><option value="sabado">SAB</option>
-                                            </select>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </details>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+            container.innerHTML = `<div class="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-slate-800 shadow-xl"><h3 class="text-[10px] font-black uppercase mb-4 text-pink-hot text-center italic">Biblioteca</h3><div class="space-y-2">${Object.keys(library).map(cat => `<details class="group"><summary class="list-none p-3 bg-slate-800 rounded-xl cursor-pointer font-bold text-[9px] uppercase flex justify-between items-center group-open:bg-pink-hot transition-all">${cat} <span>+</span></summary><div class="p-2 space-y-1">${library[cat].map(ex => `<div class="flex justify-between items-center p-2 hover:bg-slate-700 rounded-lg"><span class="text-[8px] font-bold uppercase opacity-70">${ex}</span><select onchange="if(this.value) addItem(this.value, '${ex}'); this.value='';" class="bg-pink-hot text-white text-[8px] rounded px-1 outline-none"><option value="">+</option><option value="segunda">SEG</option><option value="terca">TER</option><option value="quarta">QUA</option><option value="quinta">QUI</option><option value="sexta">SEX</option><option value="sabado">SAB</option></select></div>`).join('')}</div></details>`).join('')}</div></div>`;
         }
 
         function renderHistory() {
             if(!currentStaff) return;
             const history = JSON.parse(localStorage.getItem(`history_${currentStaff.id}`)) || {};
             const container = document.getElementById('historyList');
-            container.innerHTML = Object.keys(history).map(name => `
-                <div class="flex items-center justify-between p-2 bg-slate-800 rounded-xl mb-1">
-                    <span class="text-[9px] font-bold uppercase truncate max-w-[100px] px-2 text-white">${name}</span>
-                    <button onclick="loadStudent('${name}')" class="bg-pink-hot text-white text-[8px] px-3 py-1 rounded-full uppercase font-black">Abrir</button>
-                </div>
-            `).join('');
+            container.innerHTML = Object.keys(history).map(name => `<div class="flex items-center justify-between p-2 bg-slate-800 rounded-xl mb-1"><span class="text-[9px] font-bold uppercase truncate max-w-[100px] px-2 text-white">${name}</span><button onclick="loadStudent('${name}')" class="bg-pink-hot text-white text-[8px] px-3 py-1 rounded-full uppercase font-black">Abrir</button></div>`).join('');
         }
 
         function loadStudent(name) {
@@ -248,8 +173,7 @@
             document.getElementById('studentName').value = workoutData.student;
             document.getElementById('studentPhoto').value = workoutData.studentPhoto || "";
             document.getElementById('generalNotes').value = workoutData.generalNotes || "";
-            render();
-            updateUI();
+            render(); updateUI();
         }
 
         function saveToHistory() {
@@ -258,8 +182,7 @@
             let history = JSON.parse(localStorage.getItem(`history_${currentStaff.id}`)) || {};
             history[workoutData.student] = JSON.parse(JSON.stringify(workoutData));
             localStorage.setItem(`history_${currentStaff.id}`, JSON.stringify(history));
-            renderHistory();
-            alert("Salvo!");
+            renderHistory(); alert("Salvo!");
         }
 
         window.onload = init;
