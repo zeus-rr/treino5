@@ -22,11 +22,11 @@
 
         <div class="space-y-4">
             <div>
-                <label class="text-[10px] font-black uppercase opacity-50 ml-2">Identificação (ID)</label>
+                <label class="text-[10px] font-black uppercase opacity-50 ml-2">ID do Professor</label>
                 <input type="text" id="profId" placeholder="Ex: zeus01" class="w-full bg-slate-800 p-4 rounded-2xl outline-none border border-transparent focus:border-pink-hot transition-all font-bold">
             </div>
             <div>
-                <label class="text-[10px] font-black uppercase opacity-50 ml-2">Senha de Acesso</label>
+                <label class="text-[10px] font-black uppercase opacity-50 ml-2">Senha</label>
                 <input type="password" id="profPass" placeholder="****" class="w-full bg-slate-800 p-4 rounded-2xl outline-none border border-transparent focus:border-pink-hot transition-all font-bold">
             </div>
 
@@ -35,17 +35,29 @@
             </button>
         </div>
 
-        <div class="border-t border-slate-800 pt-6">
+        <div class="border-t border-slate-800 pt-6 space-y-4">
             <details class="group">
                 <summary class="text-center cursor-pointer list-none text-[10px] font-black uppercase opacity-50 hover:opacity-100 transition-all">
-                    Novo por aqui? Criar Perfil de Professor
+                    Criar Novo Perfil de Professor
                 </summary>
                 <div class="space-y-3 mt-4 bg-slate-800/50 p-4 rounded-2xl">
                     <input type="text" id="newName" placeholder="Seu Nome Profissional" class="w-full bg-slate-800 p-3 rounded-xl outline-none text-xs">
-                    <input type="url" id="newPhoto" placeholder="URL da sua Foto (WhatsApp/Imgur)" class="w-full bg-slate-800 p-3 rounded-xl outline-none text-xs">
+                    <input type="url" id="newPhoto" placeholder="Link da sua Foto" class="w-full bg-slate-800 p-3 rounded-xl outline-none text-xs">
                     <input type="color" id="newColor" value="#FF1493" class="w-full h-10 bg-slate-800 rounded-xl cursor-pointer">
                     <button onclick="handleRegister()" class="w-full border-2 border-pink-hot pink-hot py-3 rounded-xl font-black text-[10px] uppercase">
-                        Cadastrar e Salvar
+                        Cadastrar Agora
+                    </button>
+                </div>
+            </details>
+
+            <details class="group">
+                <summary class="text-center cursor-pointer list-none text-[8px] font-black uppercase opacity-20 hover:opacity-100 transition-all mt-4">
+                    Manutenção (Resetar Sistema)
+                </summary>
+                <div class="mt-4 p-4 border border-red-900/30 rounded-2xl bg-red-900/10">
+                    <p class="text-[8px] text-red-500 uppercase font-black text-center mb-2">Atenção: Isso apagará todos os professores e históricos salvos neste navegador!</p>
+                    <button onclick="resetSystem()" class="w-full bg-red-600 text-white py-2 rounded-xl font-black text-[10px] uppercase">
+                        Apagar Tudo e Resetar
                     </button>
                 </div>
             </details>
@@ -53,7 +65,6 @@
     </div>
 
     <script>
-        // Função para Cadastrar Novo Professor
         function handleRegister() {
             const id = document.getElementById('profId').value.trim();
             const pass = document.getElementById('profPass').value.trim();
@@ -64,18 +75,15 @@
             if (!id || !pass || !name) return alert("Preencha ID, Senha e Nome!");
 
             let staff = JSON.parse(localStorage.getItem('staff_data')) || [];
-            
-            // Verifica se ID já existe
-            if (staff.find(p => p.id === id)) return alert("Este ID já está em uso!");
+            if (staff.find(p => p.id === id)) return alert("Este ID já existe!");
 
             staff.push({ id, pass, name, photo, color });
             localStorage.setItem('staff_data', JSON.stringify(staff));
             
-            alert("Professor cadastrado com sucesso! Agora é só entrar.");
+            alert("Cadastro realizado! Use o ID e Senha acima para entrar.");
             location.reload();
         }
 
-        // Função para Fazer Login
         function handleLogin() {
             const id = document.getElementById('profId').value.trim();
             const pass = document.getElementById('profPass').value.trim();
@@ -84,12 +92,18 @@
             const prof = staff.find(p => p.id === id && p.pass === pass);
 
             if (prof) {
-                // Gera a autenticação em Base64 para passar via URL
                 const auth = btoa(JSON.stringify({ id: prof.id, pw: prof.pass }));
-                // Redireciona para o index.html na mesma pasta
                 window.location.href = `index.html?auth=${auth}`;
             } else {
-                alert("ID ou Senha incorretos!");
+                alert("Acesso negado! Verifique ID e Senha.");
+            }
+        }
+
+        function resetSystem() {
+            if (confirm("TEM CERTEZA? Isso excluirá permanentemente todos os dados de professores e treinos salvos neste navegador.")) {
+                localStorage.clear();
+                alert("Sistema resetado com sucesso!");
+                location.reload();
             }
         }
     </script>
